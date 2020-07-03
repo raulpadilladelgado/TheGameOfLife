@@ -17,24 +17,29 @@ public class TheGameOfLifeShould {
     }
     @Test
     void a_alive_cell_with_two_or_three_neighbours_stay_in_life(){
-
+        World world = new World();
+        world.addAliveCell();
+        world.addAliveCell();
+        world.addAliveCell();
+        world.nextGeneration();
+        assertThat(world.cells.get(0).isAlive).isTrue();
     }
     @Test
-    void a_alive_cell_without_two_or_three_neighbours_is_dead(){
-
+    void a_alive_cell_with_less_than_two_or_bigger_than_three_neighbours_is_dead(){
+        World world = new World();
+        world.addAliveCell();
+        world.addAliveCell();
+        world.nextGeneration();
+        assertThat(world.cells.get(0).isAlive).isFalse();
     }
 
 }
 
 class Cell {
-    public Boolean isAlive = true;
+    public Boolean isAlive;
 
     public Cell() {
-        if (Math.random() * 10 > 4) {
-            isAlive = true;
-        } else {
-            isAlive = false;
-        }
+        isAlive = Math.random() * 10 > 4;
     }
 
     public Cell(boolean isAlive) {
@@ -72,20 +77,23 @@ class World {
     }
 
     private void reviveCells() {
-        for (Integer cellKey : cells.keySet()) {
-            if(!cells.get(cellKey).isAlive){
+        cells.keySet().forEach(cellKey -> {
+            if (!cells.get(cellKey).isAlive) {
                 int amountOfNeighbours = getAmountOfNeighbours(cellKey);
                 if (amountOfNeighbours == 3) {
                     cells.get(cellKey).isAlive = true;
                 }
             }
-        }
+            int amountOfNeighbours = getAmountOfNeighbours(cellKey);
+            if (amountOfNeighbours < 2 || amountOfNeighbours > 3) {
+                cells.get(cellKey).isAlive = false;
+            }
+        });
     }
 
     private int getAmountOfNeighbours(Integer cellKey) {
         int amountOfNeighbours = 0;
-        for (Iterator<Integer> iterator = cells.keySet().iterator(); iterator.hasNext(); ) {
-            Integer key = iterator.next();
+        for (Integer key : cells.keySet()) {
             boolean isANeighbour = !cells.get(cellKey).equals(cells.get(key));
             boolean neighbourIsAlive = cells.get(key).isAlive;
             if (isANeighbour && neighbourIsAlive) {
